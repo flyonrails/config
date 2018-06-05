@@ -2,8 +2,12 @@
 
 ## bash
 
-.inputrc 中开启忽略大小写
+.inputrc 中开启忽略大小写  
 .bashrc 中定制设置快速历史记录搜索
+
+## tmux
+
+.tmux.conf
 
 ## ruby
 
