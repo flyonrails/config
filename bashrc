@@ -2,146 +2,114 @@
 # ~/.bashrc
 #
 
-[[ $- != *i* ]] && return
+#color
+black="\[\e[0;30m\]"
+red="\[\e[0;31m\]"
+green="\[\e[0;32m\]"
+yellow="\[\e[0;33m\]"
+blue="\[\e[0;34m\]"
+purple="\[\e[0;35m\]"
+cyan="\[\e[0;36m\]"
+white="\[\e[0;37m\]"
+orange="\[\e[0;91m\]"
 
-colors() {
-	local fgc bgc vals seq0
+bold_black="\[\e[30;1m\]"
+bold_red="\[\e[31;1m\]"
+bold_green="\[\e[32;1m\]"
+bold_yellow="\[\e[33;1m\]"
+bold_blue="\[\e[34;1m\]"
+bold_purple="\[\e[35;1m\]"
+bold_cyan="\[\e[36;1m\]"
+bold_white="\[\e[37;1m\]"
+bold_orange="\[\e[91;1m\]"
 
-	printf "Color escapes are %s\n" '\e[${value};...;${value}m'
-	printf "Values 30..37 are \e[33mforeground colors\e[m\n"
-	printf "Values 40..47 are \e[43mbackground colors\e[m\n"
-	printf "Value  1 gives a  \e[1mbold-faced look\e[m\n\n"
+underline_black="\[\e[30;4m\]"
+underline_red="\[\e[31;4m\]"
+underline_green="\[\e[32;4m\]"
+underline_yellow="\[\e[33;4m\]"
+underline_blue="\[\e[34;4m\]"
+underline_purple="\[\e[35;4m\]"
+underline_cyan="\[\e[36;4m\]"
+underline_white="\[\e[37;4m\]"
+underline_orange="\[\e[91;4m\]"
 
-	# foreground colors
-	for fgc in {30..37}; do
-		# background colors
-		for bgc in {40..47}; do
-			fgc=${fgc#37} # white
-			bgc=${bgc#40} # black
+background_black="\[\e[40m\]"
+background_red="\[\e[41m\]"
+background_green="\[\e[42m\]"
+background_yellow="\[\e[43m\]"
+background_blue="\[\e[44m\]"
+background_purple="\[\e[45m\]"
+background_cyan="\[\e[46m\]"
+background_white="\[\e[47;1m\]"
+background_orange="\[\e[101m\]"
 
-			vals="${fgc:+$fgc;}${bgc}"
-			vals=${vals%%;}
+normal="\[\e[0m\]"
+reset_color="\[\e[39m\]"
 
-			seq0="${vals:+\e[${vals}m}"
-			printf "  %-9s" "${seq0:-(default)}"
-			printf " ${seq0}TEXT\e[m"
-			printf " \e[${vals:+${vals+$vals;}}1mBOLD\e[m"
-		done
-		echo; echo
-	done
+# These colors are meant to be used with `echo -e`
+echo_black="\033[0;30m"
+echo_red="\033[0;31m"
+echo_green="\033[0;32m"
+echo_yellow="\033[0;33m"
+echo_blue="\033[0;34m"
+echo_purple="\033[0;35m"
+echo_cyan="\033[0;36m"
+echo_white="\033[0;37;1m"
+echo_orange="\033[0;91m"
+
+echo_bold_black="\033[30;1m"
+echo_bold_red="\033[31;1m"
+echo_bold_green="\033[32;1m"
+echo_bold_yellow="\033[33;1m"
+echo_bold_blue="\033[34;1m"
+echo_bold_purple="\033[35;1m"
+echo_bold_cyan="\033[36;1m"
+echo_bold_white="\033[37;1m"
+echo_bold_orange="\033[91;1m"
+
+echo_underline_black="\033[30;4m"
+echo_underline_red="\033[31;4m"
+echo_underline_green="\033[32;4m"
+echo_underline_yellow="\033[33;4m"
+echo_underline_blue="\033[34;4m"
+echo_underline_purple="\033[35;4m"
+echo_underline_cyan="\033[36;4m"
+echo_underline_white="\033[37;4m"
+echo_underline_orange="\033[91;4m"
+
+echo_background_black="\033[40m"
+echo_background_red="\033[41m"
+echo_background_green="\033[42m"
+echo_background_yellow="\033[43m"
+echo_background_blue="\033[44m"
+echo_background_purple="\033[45m"
+echo_background_cyan="\033[46m"
+echo_background_white="\033[47;1m"
+echo_background_orange="\033[101m"
+
+echo_normal="\033[0m"
+echo_reset_color="\033[39m"
+
+# git
+parse_git_branch() {
+	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
 }
 
-[ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
+export PS1="${green}╭${black}[${yellow}\t ${blue}\w${green}\$(parse_git_branch)${black}]\n${green}╰─${red}\$ ${black}"
 
-# Change the window title of X terminals
-case ${TERM} in
-	xterm*|rxvt*|Eterm*|aterm|kterm|gnome*|interix|konsole*)
-		PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/\~}\007"'
-		;;
-	screen*)
-		PROMPT_COMMAND='echo -ne "\033_${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/\~}\033\\"'
-		;;
-esac
-
-use_color=true
-
-# Set colorful PS1 only on colorful terminals.
-# dircolors --print-database uses its own built-in database
-# instead of using /etc/DIR_COLORS.  Try to use the external file
-# first to take advantage of user additions.  Use internal bash
-# globbing instead of external grep binary.
-safe_term=${TERM//[^[:alnum:]]/?}   # sanitize TERM
-match_lhs=""
-[[ -f ~/.dir_colors   ]] && match_lhs="${match_lhs}$(<~/.dir_colors)"
-[[ -f /etc/DIR_COLORS ]] && match_lhs="${match_lhs}$(</etc/DIR_COLORS)"
-[[ -z ${match_lhs}    ]] \
-	&& type -P dircolors >/dev/null \
-	&& match_lhs=$(dircolors --print-database)
-[[ $'\n'${match_lhs} == *$'\n'"TERM "${safe_term}* ]] && use_color=true
-
-if ${use_color} ; then
-	# Enable colors for ls, etc.  Prefer ~/.dir_colors #64489
-	if type -P dircolors >/dev/null ; then
-		if [[ -f ~/.dir_colors ]] ; then
-			eval $(dircolors -b ~/.dir_colors)
-		elif [[ -f /etc/DIR_COLORS ]] ; then
-			eval $(dircolors -b /etc/DIR_COLORS)
-		fi
-	fi
-
-	if [[ ${EUID} == 0 ]] ; then
-		PS1='\[\033[01;31m\][\h\[\033[01;36m\] \W\[\033[01;31m\]]\$\[\033[00m\] '
-	else
-		PS1='\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\] '
-	fi
-
-	alias ls='ls --color=auto'
-	alias grep='grep --colour=auto'
-	alias egrep='egrep --colour=auto'
-	alias fgrep='fgrep --colour=auto'
-else
-	if [[ ${EUID} == 0 ]] ; then
-		# show root@ when we don't have colors
-		PS1='\u@\h \W \$ '
-	else
-		PS1='\u@\h \w \$ '
-	fi
+# brew
+if type brew 2&>/dev/null; then
+  for completion_file in $(brew --prefix)/etc/bash_completion.d/*; do
+    source "$completion_file"
+  done
 fi
 
-unset use_color safe_term match_lhs sh
-
-alias cp="cp -i"                          # confirm before overwriting something
-alias df='df -h'                          # human-readable sizes
-alias free='free -m'                      # show sizes in MB
-alias np='nano -w PKGBUILD'
-alias more=less
-
-xhost +local:root > /dev/null 2>&1
-
-complete -cf sudo
-
-# Bash won't get SIGWINCH if another process is in the foreground.
-# Enable checkwinsize so that bash will check the terminal size when
-# it regains control.  #65623
-# http://cnswww.cns.cwru.edu/~chet/bash/FAQ (E11)
-shopt -s checkwinsize
-
-shopt -s expand_aliases
-
-# export QT_SELECT=4
-
-# Enable history appending instead of overwriting.  #139609
-shopt -s histappend
+# history
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+export HISTCONTROL=ignoredups
+export HISTSIZE=5000
 
 #
-# # ex - archive extractor
-# # usage: ex <file>
-ex ()
-{
-  if [ -f $1 ] ; then
-    case $1 in
-      *.tar.bz2)   tar xjf $1   ;;
-      *.tar.gz)    tar xzf $1   ;;
-      *.bz2)       bunzip2 $1   ;;
-      *.rar)       unrar x $1     ;;
-      *.gz)        gunzip $1    ;;
-      *.tar)       tar xf $1    ;;
-      *.tbz2)      tar xjf $1   ;;
-      *.tgz)       tar xzf $1   ;;
-      *.zip)       unzip $1     ;;
-      *.Z)         uncompress $1;;
-      *.7z)        7z x $1      ;;
-      *)           echo "'$1' cannot be extracted via ex()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
 
-# better yaourt colors
-export YAOURT_COLORS="nb=1:pkg=1:ver=1;32:lver=1;45:installed=1;42:grp=1;34:od=1;41;5:votes=1;44:dsc=0:other=1;35"
-
-# custom
-bind '"\e[A": history-search-backward' 
-bind '"\e[B": history-search-forward' 
 
