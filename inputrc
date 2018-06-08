@@ -1,3 +1,7 @@
+# ~/.inputrc
+# The double tab can be changed to a single tab by setting
+#     set show-all-if-unmodified on
+
 # do not show hidden files in the list
 set match-hidden-files off
 
